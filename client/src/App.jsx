@@ -86,6 +86,7 @@ function App() {
   const [length, setLength] = useState('medium');
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState('');
+  const [isCopied, setIsCopied] = useState(false);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -187,6 +188,21 @@ function App() {
     }
   };
 
+  const handleCopyLatest = async () => {
+    if (!latestAssistantMessage.trim()) {
+      setError('Generate at least one assistant response before copying.');
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(latestAssistantMessage);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 1500);
+    } catch {
+      setError('Copy failed. Your browser may not allow clipboard access.');
+    }
+  };
+
   return (
     <div className="chat-page">
       <aside className="sidebar">
@@ -243,6 +259,9 @@ function App() {
             </button>
             <button type="button" onClick={() => handleDownload('txt')}>
               Export .txt
+            </button>
+            <button type="button" onClick={handleCopyLatest}>
+              {isCopied ? 'Copied' : 'Copy last'}
             </button>
           </div>
         </header>
