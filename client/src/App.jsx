@@ -4,6 +4,7 @@ import DOMPurify from 'dompurify';
 import './App.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const CHAT_STORAGE_KEY = 'bloggpt-chat-state-v1';
 
 const toneOptions = [
   { value: 'professional', label: 'Professional' },
@@ -90,8 +91,60 @@ function App() {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
+    try {
+      const rawState = localStorage.getItem(CHAT_STORAGE_KEY);
+
+      if (!rawState) {
+        return;
+      }
+
+      const parsedState = JSON.parse(rawState);
+
+      if (Array.isArray(parsedState.messages) && parsedState.messages.length > 0) {
+        const hydratedMessages = parsedState.messages
+          .filter(
+            (message) =>
+              message &&
+              typeof message.role === 'string' &&
+              typeof message.content === 'string' &&
+              message.content.trim().length > 0,
+          )
+          .map((message) => ({
+            id: message.id || `${message.role}-${Math.random().toString(16).slice(2)}`,
+            role: message.role === 'assistant' ? 'assistant' : 'user',
+            content: message.content,
+          }));
+
+        if (hydratedMessages.length > 0) {
+          setMessages(hydratedMessages);
+        }
+      }
+
+      if (typeof parsedState.tone === 'string') {
+        setTone(parsedState.tone);
+      }
+
+      if (typeof parsedState.length === 'string') {
+        setLength(parsedState.length);
+      }
+    } catch {
+      localStorage.removeItem(CHAT_STORAGE_KEY);
+    }
+  }, []);
+
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isSending]);
+
+  useEffect(() => {
+    const snapshot = {
+      messages: messages.slice(-30),
+      tone,
+      length,
+    };
+
+    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(snapshot));
+  }, [messages, tone, length]);
 
   const latestAssistantMessage = useMemo(
     () => [...messages].reverse().find((message) => message.role === 'assistant')?.content || '',
