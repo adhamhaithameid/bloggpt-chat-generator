@@ -18,23 +18,6 @@ const lengthOptions = {
 app.use(cors({ origin: CLIENT_ORIGIN }));
 app.use(express.json({ limit: '1mb' }));
 
-function buildPrompt({ topic, tone, length }) {
-  return [
-    'You are an expert content writer and SEO blog strategist.',
-    `Write a full blog post in Markdown about: "${topic}"`,
-    `Tone: ${tone}.`,
-    `Target length: ${lengthOptions[length]}.`,
-    'Requirements:',
-    '- Start with an engaging title.',
-    '- Include an introduction that hooks the reader.',
-    '- Use clear H2/H3 headings.',
-    '- Include practical examples or actionable tips.',
-    '- End with a concise conclusion and a call to action.',
-    '- Keep the writing natural and human, not robotic.',
-    '- Return ONLY the blog content in Markdown, with no extra notes.',
-  ].join('\n');
-}
-
 function getModel() {
   const apiKey = process.env.GEMINI_API_KEY;
 
@@ -46,12 +29,130 @@ function getModel() {
   return genAI.getGenerativeModel({ model: MODEL_NAME });
 }
 
+function normalizeTone(tone) {
+  const normalizedTone = String(tone || 'professional').toLowerCase();
+
+  if (!toneOptions.has(normalizedTone)) {
+    throw new Error('Invalid tone selected.');
+  }
+
+  return normalizedTone;
+}
+
+function normalizeLength(length) {
+  const normalizedLength = String(length || 'medium').toLowerCase();
+
+  if (!lengthOptions[normalizedLength]) {
+    throw new Error('Invalid length selected.');
+  }
+
+  return normalizedLength;
+}
+
+function sanitizeHistory(history) {
+  if (!Array.isArray(history)) {
+    return [];
+  }
+
+  return history
+    .filter((entry) => entry && typeof entry.content === 'string' && typeof entry.role === 'string')
+    .map((entry) => ({
+      role: entry.role === 'assistant' ? 'Assistant' : 'User',
+      content: entry.content.trim(),
+    }))
+    .filter((entry) => entry.content.length > 0)
+    .slice(-10);
+}
+
+function buildChatPrompt({ message, history, tone, length }) {
+  const transcriptRows = sanitizeHistory(history).map((entry) => `${entry.role}: ${entry.content}`);
+  transcriptRows.push(`User: ${message.trim()}`);
+
+  return [
+    'You are BlogGPT, an expert blog writing assistant.',
+    `Primary tone: ${tone}.`,
+    `Target output length: ${lengthOptions[length]}.`,
+    'Rules:',
+    '- Respond in Markdown only.',
+    '- If asked to create a blog post, return a polished article with title, intro, clear headings, practical insights, and conclusion.',
+    '- If asked to revise, return the fully updated blog draft.',
+    '- Do not include meta commentary about instructions.',
+    '',
+    'Conversation transcript:',
+    transcriptRows.join('\n\n'),
+  ].join('\n');
+}
+
+async function generateReply({ message, history, tone, length }) {
+  const prompt = buildChatPrompt({ message, history, tone, length });
+  const model = getModel();
+  const result = await model.generateContent(prompt);
+  const text = result.response.text()?.trim();
+
+  if (!text) {
+    throw new Error('The AI returned an empty response. Please try again.');
+  }
+
+  return text;
+}
+
+function mapErrorToHttpStatus(message) {
+  if (message.toLowerCase().includes('api key') || message.includes('GEMINI_API_KEY')) {
+    return 401;
+  }
+
+  if (message === 'Invalid tone selected.' || message === 'Invalid length selected.') {
+    return 400;
+  }
+
+  if (message.includes('empty response')) {
+    return 502;
+  }
+
+  return 500;
+}
+
 app.get('/api/health', (_req, res) => {
   res.json({
     ok: true,
     service: 'ai-blog-generator-api',
     timestamp: new Date().toISOString(),
   });
+});
+
+app.post('/api/chat', async (req, res) => {
+  const { message, history = [], tone = 'professional', length = 'medium' } = req.body ?? {};
+
+  if (!message || typeof message !== 'string' || message.trim().length < 2) {
+    return res.status(400).json({
+      message: 'Please enter a valid chat message with at least 2 characters.',
+    });
+  }
+
+  try {
+    const normalizedTone = normalizeTone(tone);
+    const normalizedLength = normalizeLength(length);
+    const reply = await generateReply({
+      message,
+      history,
+      tone: normalizedTone,
+      length: normalizedLength,
+    });
+
+    return res.json({
+      reply,
+      meta: {
+        tone: normalizedTone,
+        length: normalizedLength,
+        model: MODEL_NAME,
+      },
+    });
+  } catch (error) {
+    const messageText = error?.message || 'Generation failed unexpectedly.';
+    return res.status(mapErrorToHttpStatus(messageText)).json({
+      message: `Generation failed: ${messageText}`,
+    });
+  }
 });
 
 app.post('/api/generate', async (req, res) => {
@@ -63,40 +164,18 @@ app.post('/api/generate', async (req, res) => {
     });
   }
 
-  const normalizedTone = String(tone).toLowerCase();
-  const normalizedLength = String(length).toLowerCase();
-
-  if (!toneOptions.has(normalizedTone)) {
-    return res.status(400).json({
-      message: 'Invalid tone selected.',
-    });
-  }
-
-  if (!lengthOptions[normalizedLength]) {
-    return res.status(400).json({
-      message: 'Invalid length selected.',
-    });
-  }
-
   try {
-    const prompt = buildPrompt({
-      topic: topic.trim(),
+    const normalizedTone = normalizeTone(tone);
+    const normalizedLength = normalizeLength(length);
+    const reply = await generateReply({
+      message: `Write a complete blog post about "${topic.trim()}".`,
+      history: [],
       tone: normalizedTone,
       length: normalizedLength,
     });
 
-    const model = getModel();
-    const result = await model.generateContent(prompt);
-    const content = result.response.text()?.trim();
-
-    if (!content) {
-      return res.status(502).json({
-        message: 'The AI returned an empty response. Please try again.',
-      });
-    }
-
     return res.json({
-      content,
+      content: reply,
       meta: {
         topic: topic.trim(),
         tone: normalizedTone,
@@ -105,14 +184,9 @@ app.post('/api/generate', async (req, res) => {
       },
     });
   } catch (error) {
-    const message = error?.message || 'Generation failed unexpectedly.';
-
-    if (message.toLowerCase().includes('api key') || message.includes('GEMINI_API_KEY')) {
-      return res.status(401).json({ message });
-    }
-
-    return res.status(500).json({
-      message: `Generation failed: ${message}`,
+    const messageText = error?.message || 'Generation failed unexpectedly.';
+    return res.status(mapErrorToHttpStatus(messageText)).json({
+      message: `Generation failed: ${messageText}`,
     });
   }
 });
