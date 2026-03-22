@@ -1,5 +1,5 @@
 {
-  "name": "blog-generator-server",
+  "name": "@aiblog/api",
   "version": "1.0.0",
   "description": "Backend API for AI-Powered Blog Generator",
   "main": "index.js",

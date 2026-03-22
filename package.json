@@ -2,15 +2,14 @@
   "name": "ai-powered-blog-generator",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@10.25.0",
   "description": "Internship project: AI-powered blog writing platform with Gemini API",
   "scripts": {
-    "dev": "concurrently -n api,web -c blue,green \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
-    "dev:server": "npm run dev --prefix server",
-    "dev:client": "npm run dev --prefix client",
-    "build": "npm run build --prefix client",
-    "start": "npm run start --prefix server"
-  },
-  "devDependencies": {
-    "concurrently": "^9.2.1"
+    "dev": "pnpm --parallel --filter @aiblog/api --filter @aiblog/web dev",
+    "dev:server": "pnpm --filter @aiblog/api dev",
+    "dev:client": "pnpm --filter @aiblog/web dev",
+    "build": "pnpm --filter @aiblog/web build",
+    "lint": "pnpm --filter @aiblog/web lint",
+    "start": "pnpm --filter @aiblog/api start"
   }
 }
