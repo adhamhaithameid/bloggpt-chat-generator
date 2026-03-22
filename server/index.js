@@ -145,6 +145,7 @@ app.post('/api/chat', async (req, res) => {
         tone: normalizedTone,
         length: normalizedLength,
         model: MODEL_NAME,
+        generatedAt: new Date().toISOString(),
       },
     });
   } catch (error) {
@@ -181,6 +182,7 @@ app.post('/api/generate', async (req, res) => {
         tone: normalizedTone,
         length: normalizedLength,
         model: MODEL_NAME,
+        generatedAt: new Date().toISOString(),
       },
     });
   } catch (error) {
