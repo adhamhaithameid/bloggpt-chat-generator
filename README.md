@@ -90,6 +90,16 @@ pnpm dev
 - `pnpm build` - build frontend
 - `pnpm lint` - lint frontend
 
+## Troubleshooting pnpm install
+
+If your pnpm is configured to auto-manage package-manager versions, this repo already disables that behavior via `.npmrc`.
+
+If an install was interrupted, retry with:
+
+```bash
+pnpm install --config.manage-package-manager-versions=false
+```
+
 ## API Endpoints
 
 ### `POST /api/chat`
