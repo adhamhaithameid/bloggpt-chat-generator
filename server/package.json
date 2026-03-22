@@ -1,7 +1,7 @@
 {
-  "name": "@writeflow/api",
+  "name": "@compose/api",
   "version": "1.0.0",
-  "description": "Backend API for WriteFlow",
+  "description": "Backend API for Compose",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js",

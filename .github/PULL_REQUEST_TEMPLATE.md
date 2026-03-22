@@ -1,12 +1,12 @@
 ## Summary
-Describe what changed in WriteFlow and why.
+Describe what changed in Compose and why.
 
 ## Related Issue
 Closes #
 
 ## Testing
-- [ ] `pnpm --filter @writeflow/web lint`
-- [ ] `pnpm --filter @writeflow/web build`
+- [ ] `pnpm --filter @compose/web lint`
+- [ ] `pnpm --filter @compose/web build`
 - [ ] Manual smoke test completed (`pnpm dev`)
 
 ## Checklist

@@ -1,15 +1,15 @@
 {
-  "name": "writeflow",
+  "name": "compose",
   "version": "1.0.0",
   "private": true,
   "packageManager": "pnpm@10.25.0",
-  "description": "WriteFlow — AI-powered writing assistant with Gemini API",
+  "description": "Compose — AI-powered writing assistant with Gemini API",
   "scripts": {
-    "dev": "pnpm --parallel --filter @writeflow/api --filter @writeflow/web dev",
-    "dev:server": "pnpm --filter @writeflow/api dev",
-    "dev:client": "pnpm --filter @writeflow/web dev",
-    "build": "pnpm --filter @writeflow/web build",
-    "lint": "pnpm --filter @writeflow/web lint",
-    "start": "pnpm --filter @writeflow/api start"
+    "dev": "pnpm --parallel --filter @compose/api --filter @compose/web dev",
+    "dev:server": "pnpm --filter @compose/api dev",
+    "dev:client": "pnpm --filter @compose/web dev",
+    "build": "pnpm --filter @compose/web build",
+    "lint": "pnpm --filter @compose/web lint",
+    "start": "pnpm --filter @compose/api start"
   }
 }

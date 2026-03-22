@@ -1,4 +1,4 @@
-# WriteFlow — AI Writing Assistant
+# Compose — AI Writing Assistant
 
 A full-stack, chat-style AI writing platform.
 
@@ -76,7 +76,7 @@ pnpm dev
 
 ## GitHub Workflow Files
 
-- `.github/PULL_REQUEST_TEMPLATE.md` — Pull request checklist for WriteFlow changes
+- `.github/PULL_REQUEST_TEMPLATE.md` — Pull request checklist for Compose changes
 - `.github/ISSUE_TEMPLATE/bug_report.yml` — Structured bug reports
 - `.github/ISSUE_TEMPLATE/feature_request.yml` — Structured feature requests
 

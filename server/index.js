@@ -69,7 +69,7 @@ function buildChatPrompt({ message, history, tone, length }) {
   transcriptRows.push(`User: ${message.trim()}`);
 
   return [
-    'You are WriteFlow, an expert AI writing assistant.',
+    'You are Compose, an expert AI writing assistant.',
     `Primary tone: ${tone}.`,
     `Target output length: ${lengthOptions[length]}.`,
     'Rules:',
@@ -115,7 +115,7 @@ function mapErrorToHttpStatus(message) {
 app.get('/api/health', (_req, res) => {
   res.json({
     ok: true,
-    service: 'writeflow-api',
+    service: 'compose-api',
     timestamp: new Date().toISOString(),
   });
 });
@@ -194,5 +194,5 @@ app.post('/api/generate', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`WriteFlow API running on http://localhost:${PORT}`);
+  console.log(`Compose API running on http://localhost:${PORT}`);
 });

@@ -1,5 +1,5 @@
 name: Bug report
-description: Report a reproducible problem in WriteFlow.
+description: Report a reproducible problem in Compose.
 title: "[Bug] "
 labels:
   - bug
@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for helping improve WriteFlow.
+        Thanks for helping improve Compose.
   - type: textarea
     id: summary
     attributes:
