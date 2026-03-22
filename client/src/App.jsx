@@ -4,13 +4,13 @@ import DOMPurify from 'dompurify';
 import { getStarterPrompts, promptLibrary } from './prompt-library';
 import './App.css';
 
-const CHAT_STORAGE_KEY = 'compose-chat-state-v1';
+const CHAT_STORAGE_KEY = 'writeflow-chat-state-v1';
 
 const WELCOME_MESSAGE = {
   id: 'assistant-welcome',
   role: 'assistant',
   content:
-    "Hey there! I'm **Compose** — your AI writing assistant.\n\nTell me a topic and I'll draft a polished blog post for you. You can ask me to adjust the tone, expand sections, shorten it, or rewrite entirely.",
+    "Hey there! I'm **WriteFlow** — your AI writing assistant.\n\nTell me a topic and I'll draft a polished blog post for you. You can ask me to adjust the tone, expand sections, shorten it, or rewrite entirely.",
 };
 
 const toneOptions = [
@@ -55,7 +55,7 @@ const settingsTabs = [
   { id: 'export', label: 'Export' },
 ];
 
-const COMPOSE_TEMPLATE = `{
+const WRITEFLOW_TEMPLATE = `{
   "message": "{{message}}",
   "history": "{{history}}",
   "tone": "{{tone}}",
@@ -71,7 +71,7 @@ const OPENAI_TEMPLATE = `{
 const defaultLocalApi = {
   url: 'http://localhost:5001/api/chat',
   headersJson: '{}',
-  bodyTemplateJson: COMPOSE_TEMPLATE,
+  bodyTemplateJson: WRITEFLOW_TEMPLATE,
   responsePath: 'reply',
   errorPath: 'message',
   apiKey: '',
@@ -558,7 +558,7 @@ function App() {
 
   const handleExportMessage = (content, format) => {
     const snippet = content.slice(0, 60);
-    const fileBaseName = slugify(snippet) || 'compose-draft';
+    const fileBaseName = slugify(snippet) || 'writeflow-draft';
     if (format === 'md') {
       downloadFile({
         fileName: `${fileBaseName}.md`,
@@ -580,8 +580,8 @@ function App() {
       setError('Generate at least one response before downloading.');
       return;
     }
-    const basePrompt = messages.find((m) => m.role === 'user')?.content || 'compose-draft';
-    const fileBaseName = slugify(basePrompt) || 'compose-draft';
+    const basePrompt = messages.find((m) => m.role === 'user')?.content || 'writeflow-draft';
+    const fileBaseName = slugify(basePrompt) || 'writeflow-draft';
 
     if (format === 'md') {
       downloadFile({
@@ -928,8 +928,8 @@ function App() {
           </label>
 
           <div className="template-btns">
-            <button type="button" onClick={() => updateConfig('bodyTemplateJson', COMPOSE_TEMPLATE)}>
-              Compose Template
+            <button type="button" onClick={() => updateConfig('bodyTemplateJson', WRITEFLOW_TEMPLATE)}>
+              WriteFlow Template
             </button>
             <button type="button" onClick={() => updateConfig('bodyTemplateJson', OPENAI_TEMPLATE)}>
               OpenAI Template
@@ -957,7 +957,7 @@ function App() {
                 <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="2"/><circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" strokeWidth="2"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/>
               </svg>
             </span>
-            Compose
+            WriteFlow
           </span>
         </div>
         <div className="topbar-right">
@@ -1105,7 +1105,7 @@ function App() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Message Compose..."
+            placeholder="Message WriteFlow..."
             rows={1}
           />
           <button
@@ -1117,7 +1117,7 @@ function App() {
           </button>
         </form>
         <p className="composer-hint">
-          Compose can make mistakes. Review important outputs carefully.
+          WriteFlow can make mistakes. Review important outputs carefully.
         </p>
       </div>
     </main>

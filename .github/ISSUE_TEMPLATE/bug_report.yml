@@ -1,0 +1,44 @@
+name: Bug report
+description: Report a reproducible problem in WriteFlow.
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve WriteFlow.
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: A clear and concise description of the bug.
+      placeholder: Describe the issue and what you expected.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Provide clear steps so we can reproduce the problem.
+      placeholder: |
+        1. Go to ...
+        2. Click on ...
+        3. Enter ...
+        4. See error ...
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser, OS, and app mode (dev/prod).
+      placeholder: "Chrome 135 on macOS 15, local dev"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Include relevant logs, screenshots, or stack traces.
+      render: shell

@@ -1,0 +1,32 @@
+name: Feature request
+description: Suggest an improvement for WriteFlow.
+title: "[Feature] "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing your idea.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What user or business problem does this solve?
+      placeholder: Explain the pain point.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe your preferred solution.
+      placeholder: Explain what you want to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any alternatives or workarounds you considered.
+      placeholder: Optional
