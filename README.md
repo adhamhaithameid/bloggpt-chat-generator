@@ -6,10 +6,24 @@ Users can chat with an AI assistant to generate and refine blog drafts, choose t
 
 ## Features
 
-- ChatGPT-like chat interface (sidebar + threaded conversation)
+- ChatGPT/Claude/Gemini-style minimal chat interface
+- 2-line composer layout: line 1 message input, line 2 controls/actions
+- Dedicated Settings page for API routing, themes, and defaults
 - Gemini-powered AI responses for blog drafting and rewriting
+- API target switching:
+  - Built-in local API (`/api/chat`)
+  - Custom local API endpoint
+  - Custom external API endpoint
+- Fully customizable custom API request body template and response path mapping
 - Tone control: professional, casual, friendly, persuasive, witty
 - Length control: short, medium, long
+- Multiple themes:
+  - White Mode
+  - Dark Mode
+  - Matrix White
+  - Matrix Dark
+  - GitHub White
+  - GitHub Dark
 - Export latest assistant response as `.md` or `.txt`
 - Responsive layout for desktop and mobile
 
@@ -106,4 +120,16 @@ Basic health check.
 1. Start a new chat
 2. Ask for a blog draft on a topic
 3. Ask follow-up edits (tone/length changes)
-4. Export the final response as `.md`
+4. Switch theme and show UI personalization
+5. Switch API target to custom local or external and test custom mapping
+6. Export the final response as `.md`
+
+## Custom API Placeholders
+
+When using `Custom Local` or `Custom External`, these placeholders can be used inside the JSON request template:
+
+- `{{message}}`
+- `{{history}}`
+- `{{tone}}`
+- `{{length}}`
+- `{{openaiMessages}}`
