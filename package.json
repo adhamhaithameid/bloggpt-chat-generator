@@ -1,15 +1,15 @@
 {
-  "name": "ai-powered-blog-generator",
+  "name": "compose",
   "version": "1.0.0",
   "private": true,
   "packageManager": "pnpm@10.25.0",
-  "description": "Internship project: AI-powered blog writing platform with Gemini API",
+  "description": "Compose — AI-powered writing assistant with Gemini API",
   "scripts": {
-    "dev": "pnpm --parallel --filter @aiblog/api --filter @aiblog/web dev",
-    "dev:server": "pnpm --filter @aiblog/api dev",
-    "dev:client": "pnpm --filter @aiblog/web dev",
-    "build": "pnpm --filter @aiblog/web build",
-    "lint": "pnpm --filter @aiblog/web lint",
-    "start": "pnpm --filter @aiblog/api start"
+    "dev": "pnpm --parallel --filter @compose/api --filter @compose/web dev",
+    "dev:server": "pnpm --filter @compose/api dev",
+    "dev:client": "pnpm --filter @compose/web dev",
+    "build": "pnpm --filter @compose/web build",
+    "lint": "pnpm --filter @compose/web lint",
+    "start": "pnpm --filter @compose/api start"
   }
 }

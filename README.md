@@ -1,30 +1,20 @@
-# BlogGPT Chat - AI Blog Generator
+# WriteFlow — AI Writing Assistant
 
-A full-stack, chat-style AI writing platform for internship demos.
+A full-stack, chat-style AI writing platform.
 
-Users can chat with an AI assistant to generate and refine blog drafts, choose tone and length, and export responses.
+Chat with an AI assistant to generate and refine blog drafts, choose tone and length, and export polished responses.
 
 ## Features
 
-- ChatGPT/Claude/Gemini-style minimal chat interface
-- 2-line composer layout: line 1 message input, line 2 controls/actions
-- Dedicated Settings page for API routing, themes, and defaults
-- Gemini-powered AI responses for blog drafting and rewriting
-- API target switching:
-  - Built-in local API (`/api/chat`)
-  - Custom local API endpoint
-  - Custom external API endpoint
-- Fully customizable custom API request body template and response path mapping
-- Tone control: professional, casual, friendly, persuasive, witty
-- Length control: short, medium, long
-- Multiple themes:
-  - White Mode
-  - Dark Mode
-  - Matrix White
-  - Matrix Dark
-  - GitHub White
-  - GitHub Dark
-- Export latest assistant response as `.md` or `.txt`
+- Modern ChatGPT/Claude-style full-page chat interface
+- Pinned composer bar with image attachment support
+- Dedicated Settings page:
+  - 6 themes (Dark, Light, Matrix Dark/Light, GitHub Dark/Light)
+  - Writing defaults (tone & length)
+  - API source routing (Local / External)
+  - Export latest response (.md / .txt)
+- Gemini-powered AI responses
+- Custom API request body template and response path mapping
 - Responsive layout for desktop and mobile
 
 ## Tech Stack
@@ -36,8 +26,8 @@ Users can chat with an AI assistant to generate and refine blog drafts, choose t
 
 ## Project Structure
 
-- `client` - React chat app
-- `server` - Express API (`/api/chat`, `/api/generate`, `/api/health`)
+- `client` — React chat app
+- `server` — Express API (`/api/chat`, `/api/generate`, `/api/health`)
 
 ## Requirements
 
@@ -55,8 +45,6 @@ pnpm install
 
 ### 2. Configure environment
 
-Create backend env file:
-
 ```bash
 cp server/.env.example server/.env
 ```
@@ -65,12 +53,6 @@ Set your key inside `server/.env`:
 
 ```env
 GEMINI_API_KEY=your_real_key_here
-```
-
-Optional frontend env (if backend is hosted elsewhere):
-
-```bash
-cp client/.env.example client/.env
 ```
 
 ## Run in development
@@ -82,29 +64,19 @@ pnpm dev
 - Frontend: `http://localhost:5173`
 - Backend: `http://localhost:5001`
 
-## Useful Scripts
+## Scripts
 
-- `pnpm dev` - run frontend and backend in parallel
-- `pnpm dev:client` - run only frontend
-- `pnpm dev:server` - run only backend
-- `pnpm build` - build frontend
-- `pnpm lint` - lint frontend
-
-## Troubleshooting pnpm install
-
-If your pnpm is configured to auto-manage package-manager versions, this repo already disables that behavior via `.npmrc`.
-
-If an install was interrupted, retry with:
-
-```bash
-pnpm install --config.manage-package-manager-versions=false
-```
+| Script | Description |
+|---|---|
+| `pnpm dev` | Run frontend + backend in parallel |
+| `pnpm dev:client` | Run only frontend |
+| `pnpm dev:server` | Run only backend |
+| `pnpm build` | Build frontend |
+| `pnpm lint` | Lint frontend |
 
 ## API Endpoints
 
 ### `POST /api/chat`
-
-Request:
 
 ```json
 {
@@ -115,31 +87,16 @@ Request:
 }
 ```
 
-Response includes `reply` (Markdown text).
-
 ### `POST /api/generate`
 
-Backward-compatible endpoint for one-shot blog generation from a topic/title.
+One-shot blog generation from a topic/title.
 
 ### `GET /api/health`
 
 Basic health check.
 
-## Demo Flow (Internship)
-
-1. Start a new chat
-2. Ask for a blog draft on a topic
-3. Ask follow-up edits (tone/length changes)
-4. Switch theme and show UI personalization
-5. Switch API target to custom local or external and test custom mapping
-6. Export the final response as `.md`
-
 ## Custom API Placeholders
 
-When using `Custom Local` or `Custom External`, these placeholders can be used inside the JSON request template:
+When using Custom Local or Custom External API, these placeholders can be used:
 
-- `{{message}}`
-- `{{history}}`
-- `{{tone}}`
-- `{{length}}`
-- `{{openaiMessages}}`
+- `{{message}}`, `{{history}}`, `{{tone}}`, `{{length}}`, `{{openaiMessages}}`
