@@ -1,22 +1,162 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-  font-family: 'Space Grotesk', 'Avenir Next', 'Segoe UI', sans-serif;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --font-ui: 'Plus Jakarta Sans', 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+:root,
+:root[data-theme='dark'] {
+  --bg-canvas: #0f1319;
+  --bg-surface: #151b24;
+  --bg-subtle: #1c2531;
+  --bg-elevated: #121822;
+  --text-primary: #ecf1f8;
+  --text-muted: #9eacc1;
+  --border: #2b394c;
+  --accent: #27c296;
+  --accent-soft: rgba(39, 194, 150, 0.16);
+  --text-on-accent: #072018;
+  --assistant-bg: #17212d;
+  --assistant-border: #32465f;
+  --user-bg: #1b3d36;
+  --user-border: #2f7265;
+  --user-text: #ecfffb;
+  --code-bg: #101721;
+  --code-border: #2a3a4d;
+  --danger: #ff9a9a;
+  --shadow: 0 18px 40px rgba(0, 0, 0, 0.36);
+}
+
+:root[data-theme='white'] {
+  --bg-canvas: #f4f8ff;
+  --bg-surface: #ffffff;
+  --bg-subtle: #edf3fb;
+  --bg-elevated: #f8fbff;
+  --text-primary: #0f233f;
+  --text-muted: #4e627e;
+  --border: #d1deef;
+  --accent: #0f7ae6;
+  --accent-soft: rgba(15, 122, 230, 0.12);
+  --text-on-accent: #ffffff;
+  --assistant-bg: #f4f8ff;
+  --assistant-border: #d1deef;
+  --user-bg: #deefff;
+  --user-border: #9ac8f2;
+  --user-text: #0f233f;
+  --code-bg: #f0f5fc;
+  --code-border: #d1deef;
+  --danger: #cf294d;
+  --shadow: 0 14px 32px rgba(18, 38, 63, 0.1);
+}
+
+:root[data-theme='matrix-white'] {
+  --bg-canvas: #f3fff3;
+  --bg-surface: #f8fff8;
+  --bg-subtle: #eaffea;
+  --bg-elevated: #ffffff;
+  --text-primary: #11361a;
+  --text-muted: #356540;
+  --border: #b8dfbf;
+  --accent: #2a8f3b;
+  --accent-soft: rgba(42, 143, 59, 0.12);
+  --text-on-accent: #ffffff;
+  --assistant-bg: #f3fff3;
+  --assistant-border: #b8dfbf;
+  --user-bg: #dbf4de;
+  --user-border: #94c89d;
+  --user-text: #11361a;
+  --code-bg: #edf8ed;
+  --code-border: #b8dfbf;
+  --danger: #b43c3c;
+  --shadow: 0 14px 30px rgba(26, 68, 34, 0.12);
+}
+
+:root[data-theme='matrix-dark'] {
+  --bg-canvas: #050a05;
+  --bg-surface: #081108;
+  --bg-subtle: #0b190d;
+  --bg-elevated: #040904;
+  --text-primary: #bdffbf;
+  --text-muted: #6bb66f;
+  --border: #1f3f23;
+  --accent: #4fff72;
+  --accent-soft: rgba(79, 255, 114, 0.15);
+  --text-on-accent: #03240a;
+  --assistant-bg: #0a150b;
+  --assistant-border: #26522c;
+  --user-bg: #13301a;
+  --user-border: #2d6b38;
+  --user-text: #e8ffe8;
+  --code-bg: #071007;
+  --code-border: #27582f;
+  --danger: #ff9f9f;
+  --shadow: 0 20px 42px rgba(4, 32, 8, 0.45);
+}
+
+:root[data-theme='github-white'] {
+  --bg-canvas: #f6f8fa;
+  --bg-surface: #ffffff;
+  --bg-subtle: #f6f8fa;
+  --bg-elevated: #ffffff;
+  --text-primary: #1f2328;
+  --text-muted: #57606a;
+  --border: #d0d7de;
+  --accent: #0969da;
+  --accent-soft: rgba(9, 105, 218, 0.12);
+  --text-on-accent: #ffffff;
+  --assistant-bg: #f6f8fa;
+  --assistant-border: #d0d7de;
+  --user-bg: #ddf4ff;
+  --user-border: #54aeff;
+  --user-text: #1f2328;
+  --code-bg: #f6f8fa;
+  --code-border: #d0d7de;
+  --danger: #cf222e;
+  --shadow: 0 12px 30px rgba(31, 35, 40, 0.08);
+}
+
+:root[data-theme='github-dark'] {
+  --bg-canvas: #0d1117;
+  --bg-surface: #161b22;
+  --bg-subtle: #161b22;
+  --bg-elevated: #0d1117;
+  --text-primary: #e6edf3;
+  --text-muted: #8b949e;
+  --border: #30363d;
+  --accent: #2f81f7;
+  --accent-soft: rgba(47, 129, 247, 0.16);
+  --text-on-accent: #ffffff;
+  --assistant-bg: #161b22;
+  --assistant-border: #30363d;
+  --user-bg: #1f6feb33;
+  --user-border: #1f6feb;
+  --user-text: #e6edf3;
+  --code-bg: #0d1117;
+  --code-border: #30363d;
+  --danger: #ff7b72;
+  --shadow: 0 16px 34px rgba(1, 4, 9, 0.52);
 }
 
 * {
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
 body {
   margin: 0;
-  min-height: 100vh;
-  background: #1f1f1f;
-  color: #ececec;
+  background: var(--bg-canvas);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 180ms ease, color 180ms ease;
 }
 
 button,
@@ -28,9 +168,21 @@ textarea {
 
 code,
 pre {
-  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
 }
 
-#root {
-  min-height: 100vh;
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+  background-color: color-mix(in srgb, var(--text-muted) 45%, transparent);
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
 }
