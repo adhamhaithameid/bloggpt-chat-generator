@@ -4,3 +4,5 @@ server/node_modules/
 client/dist/
 server/.env
 .DS_Store
+.pnpm-store/
+pnpm-debug.log*
