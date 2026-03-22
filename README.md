@@ -1,93 +1,109 @@
-# AI-Powered Blog Generator
+# BlogGPT Chat - AI Blog Generator
 
-A full-stack blog writing platform that generates article drafts from a topic/title using Gemini API.
+A full-stack, chat-style AI writing platform for internship demos.
 
-## What this project does
+Users can chat with an AI assistant to generate and refine blog drafts, choose tone and length, and export responses.
 
-- Accepts a topic/title input
-- Accepts a writing tone selection
-- Accepts an article length selection
-- Uses a backend API to call Gemini and generate a full draft
-- Shows an editable Markdown editor
-- Shows a live post preview
-- Exports/downloads the final post as `.md`, `.txt`, or `.html`
+## Features
 
-## Tech stack
+- ChatGPT-like chat interface (sidebar + threaded conversation)
+- Gemini-powered AI responses for blog drafting and rewriting
+- Tone control: professional, casual, friendly, persuasive, witty
+- Length control: short, medium, long
+- Export latest assistant response as `.md` or `.txt`
+- Responsive layout for desktop and mobile
+
+## Tech Stack
 
 - Frontend: React + Vite
 - Backend: Node.js + Express
-- AI API: Gemini (`@google/generative-ai`)
+- AI: Google Gemini API (`@google/generative-ai`)
+- Package manager: pnpm workspace
 
-## Project structure
+## Project Structure
 
-- `client` - React frontend
-- `server` - Express API
+- `client` - React chat app
+- `server` - Express API (`/api/chat`, `/api/generate`, `/api/health`)
+
+## Requirements
+
+- Node.js 18+
+- pnpm 10+
+- Gemini API key
 
 ## Setup
 
 ### 1. Install dependencies
 
-Run this in the project root:
-
 ```bash
-npm install
-npm install --prefix server
-npm install --prefix client
+pnpm install
 ```
 
-### 2. Add Gemini API key
+### 2. Configure environment
 
-Create a `.env` file in `server`:
+Create backend env file:
 
 ```bash
 cp server/.env.example server/.env
 ```
 
-Then edit `server/.env` and set:
+Set your key inside `server/.env`:
 
 ```env
 GEMINI_API_KEY=your_real_key_here
 ```
 
-Optional: if you deploy the backend separately, create `client/.env`:
+Optional frontend env (if backend is hosted elsewhere):
 
 ```bash
 cp client/.env.example client/.env
 ```
 
-### 3. Start the app
-
-From root:
+## Run in development
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
-- Frontend runs at `http://localhost:5173`
-- Backend runs at `http://localhost:5001`
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:5001`
 
-## API endpoint
+## Useful Scripts
 
-- `POST /api/generate`
+- `pnpm dev` - run frontend and backend in parallel
+- `pnpm dev:client` - run only frontend
+- `pnpm dev:server` - run only backend
+- `pnpm build` - build frontend
+- `pnpm lint` - lint frontend
 
-Request body:
+## API Endpoints
+
+### `POST /api/chat`
+
+Request:
 
 ```json
 {
-  "topic": "How AI changes product management",
+  "message": "Write a blog post about AI in education",
+  "history": [],
   "tone": "professional",
   "length": "medium"
 }
 ```
 
-## Notes
+Response includes `reply` (Markdown text).
 
-- Keep your API key only in `server/.env` (never commit it)
-- Default Gemini model is `gemini-1.5-flash` (changeable via `GEMINI_MODEL`)
+### `POST /api/generate`
 
-## Internship demo idea
+Backward-compatible endpoint for one-shot blog generation from a topic/title.
 
-1. Enter a trending topic
-2. Generate a draft in different tones (professional vs casual)
-3. Edit a section live
-4. Download as `.html` and open it in browser
+### `GET /api/health`
+
+Basic health check.
+
+## Demo Flow (Internship)
+
+1. Start a new chat
+2. Ask for a blog draft on a topic
+3. Ask follow-up edits (tone/length changes)
+4. Export the final response as `.md`
