@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import './App.css';
@@ -14,16 +14,25 @@ const toneOptions = [
 ];
 
 const lengthOptions = [
-  { value: 'short', label: 'Short (350-500 words)' },
-  { value: 'medium', label: 'Medium (700-900 words)' },
-  { value: 'long', label: 'Long (1200-1500 words)' },
+  { value: 'short', label: 'Short' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'long', label: 'Long' },
 ];
 
-const initialForm = {
-  topic: '',
-  tone: 'professional',
-  length: 'medium',
-};
+const starterPrompts = [
+  'Write a blog post about AI trends in 2026',
+  'Create a persuasive blog about remote work productivity',
+  'Draft a beginner-friendly article about prompt engineering',
+  'Rewrite my post with a more casual and witty tone',
+];
+
+function createMessage(role, content) {
+  return {
+    id: `${role}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    role,
+    content,
+  };
+}
 
 function toPlainText(markdown) {
   return markdown
@@ -46,11 +55,6 @@ function slugify(value) {
     .slice(0, 60);
 }
 
-function getWordCount(text) {
-  const words = text.match(/\b[\w'-]+\b/g);
-  return words ? words.length : 0;
-}
-
 function downloadFile({ fileName, mimeType, content }) {
   const blob = new Blob([content], { type: mimeType });
   const link = document.createElement('a');
@@ -60,211 +64,233 @@ function downloadFile({ fileName, mimeType, content }) {
   URL.revokeObjectURL(link.href);
 }
 
+function renderMarkdown(content) {
+  const rendered = marked.parse(content);
+  const html = typeof rendered === 'string' ? rendered : '';
+  return DOMPurify.sanitize(html);
+}
+
 function App() {
-  const [form, setForm] = useState(initialForm);
-  const [content, setContent] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
+  const welcomeMessage = useMemo(
+    () =>
+      createMessage(
+        'assistant',
+        '# Welcome to BlogGPT\n\nDescribe your topic and I will generate a full blog draft. You can ask for rewrites, different tones, or shorter/longer versions.',
+      ),
+    [],
+  );
+
+  const [messages, setMessages] = useState([welcomeMessage]);
+  const [input, setInput] = useState('');
+  const [tone, setTone] = useState('professional');
+  const [length, setLength] = useState('medium');
+  const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const messagesEndRef = useRef(null);
 
-  const previewHtml = useMemo(() => {
-    if (!content.trim()) {
-      return '<p class="empty-preview">Your generated article preview will appear here.</p>';
-    }
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isSending]);
 
-    const rendered = marked.parse(content);
-    const html = typeof rendered === 'string' ? rendered : '';
-    return DOMPurify.sanitize(html);
-  }, [content]);
+  const latestAssistantMessage = useMemo(
+    () => [...messages].reverse().find((message) => message.role === 'assistant')?.content || '',
+    [messages],
+  );
 
-  const words = useMemo(() => getWordCount(content), [content]);
+  const sendMessage = async (text) => {
+    const trimmed = text.trim();
 
-  const handleFieldChange = (event) => {
-    const { name, value } = event.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleGenerate = async (event) => {
-    event.preventDefault();
-    setError('');
-    setSuccess('');
-
-    if (!form.topic.trim()) {
-      setError('Please enter a topic or title first.');
+    if (!trimmed || isSending) {
       return;
     }
 
-    setIsGenerating(true);
+    setError('');
+
+    const history = messages.map((message) => ({
+      role: message.role,
+      content: message.content,
+    }));
+
+    setMessages((prev) => [...prev, createMessage('user', trimmed)]);
+    setInput('');
+    setIsSending(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/generate`, {
+      const response = await fetch(`${API_BASE_URL}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          message: trimmed,
+          history,
+          tone,
+          length,
+        }),
       });
 
       const payload = await response.json();
 
       if (!response.ok) {
-        throw new Error(payload.message || 'Generation failed. Please try again.');
+        throw new Error(payload.message || 'Chat request failed.');
       }
 
-      setContent(payload.content);
-      setSuccess('Draft generated. You can now edit and export your post.');
-    } catch (apiError) {
-      setError(apiError.message || 'Failed to generate blog post.');
+      setMessages((prev) => [...prev, createMessage('assistant', payload.reply)]);
+    } catch (requestError) {
+      setError(requestError.message || 'Failed to send message.');
     } finally {
-      setIsGenerating(false);
+      setIsSending(false);
     }
   };
 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    await sendMessage(input);
+  };
+
+  const handleComposerKeyDown = async (event) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      await sendMessage(input);
+    }
+  };
+
+  const handleNewChat = () => {
+    setMessages([welcomeMessage]);
+    setInput('');
+    setError('');
+  };
+
   const handleDownload = (format) => {
-    if (!content.trim()) {
-      setError('Generate or write a post before downloading.');
+    if (!latestAssistantMessage.trim()) {
+      setError('Generate at least one assistant response before downloading.');
       return;
     }
 
-    const safeTopic = slugify(form.topic || 'blog-post') || 'blog-post';
+    const fileBaseName = slugify(messages.find((message) => message.role === 'user')?.content || 'blog-draft') || 'blog-draft';
 
     if (format === 'md') {
       downloadFile({
-        fileName: `${safeTopic}.md`,
+        fileName: `${fileBaseName}.md`,
         mimeType: 'text/markdown;charset=utf-8',
-        content,
+        content: latestAssistantMessage,
       });
       return;
     }
 
     if (format === 'txt') {
       downloadFile({
-        fileName: `${safeTopic}.txt`,
+        fileName: `${fileBaseName}.txt`,
         mimeType: 'text/plain;charset=utf-8',
-        content: toPlainText(content),
-      });
-      return;
-    }
-
-    if (format === 'html') {
-      const documentHtml = `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>${form.topic || 'Generated Blog Post'}</title>
-    <style>
-      body { max-width: 760px; margin: 40px auto; padding: 0 16px; font-family: Georgia, serif; line-height: 1.7; color: #1e293b; }
-      h1, h2, h3 { line-height: 1.2; }
-      pre { overflow: auto; background: #f7f7f7; padding: 12px; border-radius: 8px; }
-      code { background: #f4f4f5; padding: 2px 4px; border-radius: 4px; }
-    </style>
-  </head>
-  <body>
-    ${previewHtml}
-  </body>
-</html>`;
-
-      downloadFile({
-        fileName: `${safeTopic}.html`,
-        mimeType: 'text/html;charset=utf-8',
-        content: documentHtml,
+        content: toPlainText(latestAssistantMessage),
       });
     }
   };
 
   return (
-    <div className="app-shell">
-      <header className="hero">
-        <p className="eyebrow">Internship Project</p>
-        <h1>AI-Powered Blog Generator</h1>
-        <p className="subhead">
-          Create full article drafts with Gemini AI, edit them in-place, and export in multiple formats.
-        </p>
-      </header>
+    <div className="chat-page">
+      <aside className="sidebar">
+        <div className="sidebar-top">
+          <h1>BlogGPT</h1>
+          <p>AI writing partner</p>
+        </div>
 
-      <main className="workspace">
-        <section className="card controls">
-          <h2>Generate Draft</h2>
-          <form onSubmit={handleGenerate} className="form">
-            <label htmlFor="topic">Topic or Title</label>
-            <input
-              id="topic"
-              name="topic"
-              placeholder="e.g. How AI is changing remote work in 2026"
-              value={form.topic}
-              onChange={handleFieldChange}
-            />
+        <button type="button" className="new-chat-btn" onClick={handleNewChat}>
+          + New chat
+        </button>
 
+        <section className="prompt-list">
+          <h2>Quick prompts</h2>
+          {starterPrompts.map((prompt) => (
+            <button key={prompt} type="button" className="prompt-chip" onClick={() => sendMessage(prompt)}>
+              {prompt}
+            </button>
+          ))}
+        </section>
+
+        <footer className="sidebar-footer">
+          <span>Powered by Gemini API</span>
+        </footer>
+      </aside>
+
+      <main className="chat-main">
+        <header className="chat-header">
+          <div className="settings-row">
             <label htmlFor="tone">Tone</label>
-            <select id="tone" name="tone" value={form.tone} onChange={handleFieldChange}>
+            <select id="tone" value={tone} onChange={(event) => setTone(event.target.value)}>
               {toneOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
               ))}
             </select>
+          </div>
 
+          <div className="settings-row">
             <label htmlFor="length">Length</label>
-            <select id="length" name="length" value={form.length} onChange={handleFieldChange}>
+            <select id="length" value={length} onChange={(event) => setLength(event.target.value)}>
               {lengthOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
               ))}
             </select>
+          </div>
 
-            <button type="submit" disabled={isGenerating}>
-              {isGenerating ? 'Generating...' : 'Generate Blog Draft'}
+          <div className="header-actions">
+            <button type="button" onClick={() => handleDownload('md')}>
+              Export .md
             </button>
-          </form>
-
-          <div className="status-block" aria-live="polite">
-            {error ? <p className="error">{error}</p> : null}
-            {success ? <p className="success">{success}</p> : null}
+            <button type="button" onClick={() => handleDownload('txt')}>
+              Export .txt
+            </button>
           </div>
+        </header>
 
-          <div className="meta">
-            <p>
-              <span>Word Count</span>
-              <strong>{words}</strong>
-            </p>
-            <p>
-              <span>Reading Time</span>
-              <strong>{Math.max(1, Math.round(words / 220))} min</strong>
-            </p>
-          </div>
+        <section className="messages-panel">
+          {messages.map((message) => (
+            <article key={message.id} className={`message-row ${message.role}`}>
+              <div className="avatar">{message.role === 'assistant' ? 'AI' : 'You'}</div>
+              <div className="bubble">
+                {message.role === 'assistant' ? (
+                  <div
+                    className="markdown-content"
+                    dangerouslySetInnerHTML={{ __html: renderMarkdown(message.content) }}
+                  />
+                ) : (
+                  <p>{message.content}</p>
+                )}
+              </div>
+            </article>
+          ))}
+
+          {isSending ? (
+            <article className="message-row assistant">
+              <div className="avatar">AI</div>
+              <div className="bubble typing">
+                <span />
+                <span />
+                <span />
+              </div>
+            </article>
+          ) : null}
+
+          <div ref={messagesEndRef} />
         </section>
 
-        <section className="card editor">
-          <div className="card-head">
-            <h2>Editable Draft (Markdown)</h2>
-            <div className="actions">
-              <button type="button" onClick={() => handleDownload('md')}>
-                Download .md
-              </button>
-              <button type="button" onClick={() => handleDownload('txt')}>
-                Download .txt
-              </button>
-              <button type="button" onClick={() => handleDownload('html')}>
-                Download .html
-              </button>
-            </div>
-          </div>
+        <form className="composer" onSubmit={handleSubmit}>
           <textarea
-            value={content}
-            onChange={(event) => setContent(event.target.value)}
-            placeholder="Generated blog content will appear here. You can edit everything before export."
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            onKeyDown={handleComposerKeyDown}
+            placeholder="Message BlogGPT to generate or refine your blog draft..."
           />
-        </section>
+          <button type="submit" disabled={isSending || !input.trim()}>
+            {isSending ? 'Sending...' : 'Send'}
+          </button>
+        </form>
 
-        <section className="card preview">
-          <h2>Live Preview</h2>
-          <article
-            className="markdown-preview"
-            dangerouslySetInnerHTML={{ __html: previewHtml }}
-          />
-        </section>
+        {error ? <p className="error-banner">{error}</p> : null}
       </main>
     </div>
   );
